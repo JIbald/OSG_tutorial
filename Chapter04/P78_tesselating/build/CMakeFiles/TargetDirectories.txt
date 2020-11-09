@@ -1,0 +1,3 @@
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter04/P78_tesselating/build/CMakeFiles/rebuild_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter04/P78_tesselating/build/CMakeFiles/MyProject.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter04/P78_tesselating/build/CMakeFiles/edit_cache.dir

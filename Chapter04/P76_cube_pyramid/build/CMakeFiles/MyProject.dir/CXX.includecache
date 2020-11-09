@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter04/P76_cube_pyramid/main.cpp
+osg/Geometry
+-
+osg/Geode
+-
+osgUtil/SmoothingVisitor
+-
+osgViewer/Viewer
+-
+

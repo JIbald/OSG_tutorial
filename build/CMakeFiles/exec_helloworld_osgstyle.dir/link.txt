@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/exec_helloworld_osgstyle.dir/helloworld_osgstyle.cpp.o -o exec_helloworld_osgstyle  -Wl,-rpath,/usr/local/lib /usr/local/lib/libosg.so /usr/local/lib/libosgUtil.so /usr/local/lib/libosgDB.so /usr/local/lib/libosgViewer.so /usr/local/lib/libOpenThreads.so 

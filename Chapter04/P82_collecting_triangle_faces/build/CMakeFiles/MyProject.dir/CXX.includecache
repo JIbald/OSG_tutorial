@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter04/P82_collecting_triangle_faces/main.cpp
+osg/Geometry
+-
+osg/Geode
+-
+osg/TriangleFunctor
+-
+osgUtil/Tessellator
+-
+osgViewer/Viewer
+-
+iostream
+-
+

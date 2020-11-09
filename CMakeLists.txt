@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 2.6)
+
+PROJECT(helloworld_osgstyle)
+
+FIND_PACKAGE(OpenThreads)
+FIND_PACKAGE(osg)
+FIND_PACKAGE(osgDB)
+FIND_PACKAGE(osgUtil)
+FIND_PACKAGE(osgViewer)
+
+SET(SOURCES
+	helloworld_osgstyle.cpp
+)
+
+INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR} ${OSG_INCLUDE_DIR})
+
+LINK_DIRECTORIES(${OSG_LIB_DIR})
+
+ADD_EXECUTABLE(exec_helloworld_osgstyle ${SOURCES})
+
+TARGET_LINK_LIBRARIES(exec_helloworld_osgstyle ${OSG_LIBRARY} ${OSGUTIL_LIBRARY}
+${OSGDB_LIBRARY} ${OSGVIEWER_LIBRARY} ${OPENTHREADS_LIBRARY})

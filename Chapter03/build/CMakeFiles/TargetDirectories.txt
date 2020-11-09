@@ -1,0 +1,3 @@
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/build/CMakeFiles/rebuild_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/build/CMakeFiles/MyProject.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/build/CMakeFiles/edit_cache.dir

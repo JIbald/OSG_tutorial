@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/TimeForAction-MonitoringCountedObjects/LogFileHandler.h
+osgDB/ReadFile
+-
+osgViewer/Viewer
+-
+fstream
+-
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/TimeForAction-MonitoringCountedObjects/MonitoringTarget.h
+osg/ref_ptr
+-
+osg/Referenced
+-
+iostream
+-
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/TimeForAction-MonitoringCountedObjects/main.cpp
+osgDB/ReadFile
+-
+osgViewer/Viewer
+-
+fstream
+-
+MonitoringTarget.h
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/TimeForAction-MonitoringCountedObjects/MonitoringTarget.h
+LogFileHandler.h
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter03/TimeForAction-MonitoringCountedObjects/LogFileHandler.h
+
