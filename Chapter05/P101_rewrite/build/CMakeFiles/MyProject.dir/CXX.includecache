@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter05/P101_rewrite/main.cpp
+osg/PositionAttitudeTransform
+-
+osg/Quat
+-
+osg/MatrixTransform
+-
+osgDB/ReadFile
+-
+osgViewer/Viewer
+-
+
