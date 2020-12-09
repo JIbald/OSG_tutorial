@@ -1,0 +1,3 @@
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter07/P168_HUD_camera/build/CMakeFiles/rebuild_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter07/P168_HUD_camera/build/CMakeFiles/edit_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter07/P168_HUD_camera/build/CMakeFiles/MyProject.dir

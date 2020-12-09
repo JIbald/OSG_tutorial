@@ -355,7 +355,7 @@ The inverse of the MVPW matrix is used to obtain the result of the "unproject" w
 $V0=(Xs, \; Ys, \; 0) \; * \; invMVPW$\\
 $V1 = (Xs, \; Ys, \; 1) \; * \; invMVPW$\\
 
-\subsection{The Camera class}
+\section{The Camera class}
 \begin{itemize}
 \item it's popular to use glTranslate() and glRotate()\\
 \textrightarrow moves the scene
@@ -417,11 +417,50 @@ GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
 \item similarly there's setClearDepth(), setClelarStencil(), setClearAccum() (and their get*() methods)
 \end{itemize}
 
-\item test
+\item third category includes the management of OpenGL graphgics context associated with this camera.\\
+\textrightarrow Chapter 9 Interacting with Outside Elements
 
+\item Finally, a camera can attach a texture object to internal buffer coponents (color buffer, depth buffer, and so on) and directly render the sub-scene graph into this texture.\\
+\textrightarrow the resultant texture can then be mapped to surfaces of other scenes. This techique is named render-to-textures or texture baking \textrightarrow later this chapter.
 
 \end{enumerate}
+
 \end{itemize}
 
+\subsection{Rendering order of cameras}
+\begin{itemize}
+\item at least one main camera node in any sg.\\
+\textrightarrow created and managed by the osg::ViewerViewer class\\
+\textrightarrow read it with getCamera() method.
+\item It automatically adds the root node as its child node before starting the simulation.\\
+\textrightarrow by default all other cameras (directly and indirectly added to root node) will share the graphics context associated with the main camera, will share the graphics context associated with the main camera + draw their their own sub-scenes successively onto the same rendering window.
+
+\item osg::Camera class provides setRenderOrder() method to precisely control the rendering order of cameras.\\
+\textrightarrow It has an order enum and an optional order num param.\\
+\textrightarrow first enum is either \verb|PRE_RENDER| or \verb|POST_RENDER| (indicates general rendering order\\
+\textrightarrow second is an interger num for sorting cameras of the same type in ascending order. (default = 0)
+\item this will force OSG to render camer1 first, then camera2 (larger int num ), then camera3:
+\begin{lstlisting}
+camera1 -> setRenderOrder( osg::Camera::PRE_RENDER );
+camera2 -> setRenderOrder( osg::Camera::PRE_RENDER, 5 );
+camera3 -> setRenderOrder( osg::Camera::POST_RENDER );
+\end{lstlisting}
+
+\end{itemize}
+
+If a camera is rendered first (\verb|PRE_RENDER|)it's rendering result in the buffers will be cleared and covered by the next camera, and the viewer may not be able to see its sub-scene. This is especaially useful in the case of the render-to-textures process, because we want the sub-scene to be hidden from the screen, and update the attached texture objects before starting the main scene.\\
+
+In addition, if a camera is rendered afterwards (\verb|POST_RENDER|), it may erase the current color and depth values in the buffers.\\
+\textrightarrow avoid this by calling setCLearMask() with fewer buffer maks.(HUD head up display)
+
+\subsection{Time for action creating an HUD camera}
+P168
+
+\subsection{WTF just happened?}
+an additional camera contains the glider model that is to be rendered as its sub-scene-graph on top of the rendering result(color buffer and depth buffer) of the main camera.\\
+The additional camera's goal is to implement a HUD scene that overlays the main scene. It clears the depth buffer to ensure that all pixel data drawn by this camera can pass the depth test. However, the color buffer is not cleared, keeping the uncovered pixel data of the main scene on the screen. That is why we set it up like this;
+\begin{lstlisting}
+camera -> setClearMask( GL_DEPTH_BUFFER_BIT ); // no color buffer bit
+\end{lstlisting}
 
 \end{document}
