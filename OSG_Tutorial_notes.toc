@@ -1,0 +1,26 @@
+\babel@toc {english}{}
+\contentsline {chapter}{\numberline {1}Resource Latex}{1}%
+\contentsline {section}{\numberline {1.1}A Section}{2}%
+\contentsline {section}{\numberline {1.2}Cool Pictures}{3}%
+\contentsline {chapter}{\numberline {2}}{6}%
+\contentsline {chapter}{\numberline {3}•}{7}%
+\contentsline {chapter}{\numberline {4}•}{8}%
+\contentsline {chapter}{\numberline {5}•}{9}%
+\contentsline {chapter}{\numberline {6}Creating Realistic Rendering Effects}{10}%
+\contentsline {section}{\numberline {6.1}Understanding graphics shaders}{10}%
+\contentsline {subsection}{\numberline {6.1.1}osg::Shader}{11}%
+\contentsline {section}{\numberline {6.2}Using uniforms}{12}%
+\contentsline {subsection}{\numberline {6.2.1}osg::Uniform class}{12}%
+\contentsline {subsection}{\numberline {6.2.2}Time for Action page 154}{13}%
+\contentsline {subsection}{\numberline {6.2.3}What just happened?}{13}%
+\contentsline {section}{\numberline {6.3}Working with the geometry shader}{14}%
+\contentsline {subsection}{\numberline {6.3.1}Time for action - Generating a Bezier curve}{14}%
+\contentsline {subsection}{\numberline {6.3.2}What just happened?}{14}%
+\contentsline {chapter}{\numberline {7}Viewing the World}{16}%
+\contentsline {subsection}{\numberline {7.0.1}From world to screen}{16}%
+\contentsline {subsubsection}{modelmatrix}{16}%
+\contentsline {subsubsection}{view matrix}{17}%
+\contentsline {subsubsection}{Note:}{17}%
+\contentsline {subsubsection}{projection matrix}{17}%
+\contentsline {subsubsection}{MVPW matrix}{18}%
+\contentsline {subsection}{\numberline {7.0.2}The Camera class}{18}%

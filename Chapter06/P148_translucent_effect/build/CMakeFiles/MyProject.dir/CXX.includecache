@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter06/P148_translucent_effect/main.cpp
+osg/BlendFunc
+-
+osg/Texture2D
+-
+osg/Geometry
+-
+osgDB/ReadFile
+-
+osgViewer/Viewer
+-
+

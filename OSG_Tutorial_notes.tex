@@ -1,0 +1,427 @@
+\documentclass[a4paper,12pt]{book}
+%\usepackage[a4paper, inner=1.7cm, outer=2.7cm, top=2cm, bottom=2cm, bindingoffset=1.2cm]{geometry}
+
+\usepackage{textcomp}
+\usepackage[english]{babel}
+\usepackage{blindtext}
+%\usepackage[scaled=.92]{helvet}
+\usepackage{microtype} %improve justification acorr entire document
+\usepackage{graphicx} %includes pictures of any type
+\usepackage{wrapfig} %wrap text around your pictures
+\usepackage{enumitem} %lis looks nicer, condense spacing before items in list
+%\usepackage{fancyhdr} %fancy headers etc.
+\usepackage{amsmath} %mathformulas
+\usepackage{index} %automatically generated indexes
+%\usepackage{paralist} %compacts list as well
+%\usepackage[onehalfspacing]{setspace} %also singlespacing, doublespacing (documentwide)
+
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
+
+%on Linux / MacOS:
+\usepackage[utf8]{inputenc}
+
+\newcommand{\NTT}{New Think Tank}
+\newcommand{\NTTB}{\textbf{New Think Tank}}
+\newcommand{\typew}[1]{\texttt{#1}}
+
+\makeindex
+
+\begin{document}
+\title{\Large{\textbf{Projects}}}
+\author{Johannes Ibald}
+\date{November 07, 2020}
+
+\frontmatter
+\pagenumbering{Roman} %roman numeral page numbering
+\setcounter{page}{2} %start pagenumbering on specific page
+
+\maketitle
+\let\cleardoublepage\clearpage
+\tableofcontents %lists all chapters and section headings
+
+
+%\fancyhf{}
+%\renewcommand{\headrulewidth}{2pt}
+%\renewcommand{\footrulewidth}{1pt}
+%\fancyhead[LE]{\leftmark}
+%\fancyhead[RO]{\nouppercase{\rightmark}}
+%\fancyfoot[LE,RO]{\thepage}
+
+%\pagebreak %also stretches text. If not wanted, do \newpage
+%\newpage
+\mainmatter
+\pagenumbering{arabic}
+\chapter{Resource Latex}
+
+\blindmathtrue
+\blindtext[5]
+
+\section{A Section}
+\enlargethispage{\baselineskip} %might squeeze left over text to page before 
+\blindtext[2]
+\blinditemize
+\blindenumerate
+\blinddescription
+
+
+\section{Cool Pictures}
+
+\begin{figure}[ht]  %h: here, t: top of page, b: bottom, p: in center of page
+\centering
+%\includegraphics[width=8cm]{pictures/Itsuki_def_2.png}
+\caption{Itsuki heard some shocking information}\label{fig:Ituski_shocked}
+\end{figure}
+\blindtext[2]
+\newpage
+
+
+\begin{enumerate}[label=\Roman*, font=\bfseries]
+	
+	\item Material	
+	\begin{itemize}
+		\item Fichte ?
+	\end{itemize}		
+	
+	\item Deskplate
+	\begin{itemize}
+		\item amount: 1
+		\item measurements: 2500 x 1250 x 27 [mm]
+	\end{itemize}
+
+	\item Reinforcement
+	\begin{itemize}
+		\item amount: 1
+		\item Length: 2500 mm
+		\item Width: $\leq$ 90 mm
+		\item Height: 160 $>$ H $>$ 140 [mm]
+		\item width (W) is determined by two Ikea Alex but proper legs might give more flexibility later on	
+	\end{itemize}
+\end{enumerate}
+
+\chapter{}
+\chapter{•}
+\chapter{•}
+\chapter{•}
+\chapter{Creating Realistic Rendering Effects}
+
+\section{Understanding graphics shaders}
+\begin{enumerate}
+
+\item OpenGL shading language (GLSL) provides the ability to develop graphics shaders
+
+\textrightarrow blocks of graphic software instructions to calculate more relistic rendering effects, rather than fixed function states.
+
+\item steps to desing shaders and applying them to a sg
+\begin{itemize}
+\item write your own shaders ("like C programs"). They are treated as a set of strings passed to the hardware so create them on the fly or read them as text files.
+
+
+\item specify no more than a vertex shader, a geometry shader and a fragment shader to be processed in the OpenGL pipeline. Each stage has only one main() function.
+
+\item will totally replace fixed functionalities such as fog, lighting and texture mapping, which have to be re-implemented in your shader source code.
+
+\item Shaders require OpenGL API to compile and execute them.
+\item Vertex shader scan apply transformations to each vertex
+\item Fragment shaders calculate the color of infividual pixels coming from the rasterizer;
+\item Geometry shaders re-generate geometries from existing vertices and primitive data
+
+\end{itemize}
+
+\end{enumerate}
+
+\subsection{osg::Shader}
+\begin{itemize}
+\item define shader object containing source code strings.
+\item setShaderSource() specifies the src code text from a std::string variable
+\item loadShaderSourceFromFile() reads a source file from drive.
+
+\item construct shader object from existing string like this:
+
+\begin{lstlisting}
+osg::ref_ptr<osg::Shader> vertShader = 
+	new osg::Shader(osg::Shader::VERTEX, vertText);
+\end{lstlisting}
+
+\item input param OSG::SHader::VERTEX represents the vertex shader. Use GEOMETRY or FRAGMENT enums instead to specify geometry- or fragment shader.
+
+\begin{lstlisting}
+osg::ref_ptr<osg::Shader> fragShader = 
+	new osg::Shader( osg::Shader::FRAGMENT, fragText );
+	
+osg::ref_ptr<osg::Shader> geomShader = 
+	new osg:Shader( osg::Shader::GEOMETRY );
+	
+geomShader -> loadShaderSourceFromFile( "source.geom" );
+
+\end{lstlisting}
+\textrightarrow source.geom contains geometry shader.
+
+\item osgDB::readShaderFile() may be even better\\
+\textrightarrow automatically checks shader types (via extensions: .vert, .frag, .geom)\\
+\textrightarrow returns osg::Shader instance of correct type and data:\\
+\begin{lstlisting}
+osg::Shader* fragShader =
+	osgDB::readShaderFile("source.frag");
+
+\end{lstlisting}
+\textrightarrow shaders are set and ready to be use\\
+\textrightarrow use osg::Program calss and addShader() method to include include shaders and set GLSL rendering attribute and modes to a state set.\\
+
+\item most other fixed-function states willbecome incalid after the shaders make effects, including lights, materials, fog, texture mapping, texture coordinate generation and texture environment.\\
+
+\item following code adds all above shaders to an osg::Program objectand attaches it to the state set of existing node:
+
+\begin{lstlisting}
+osg::ref)ptr<osg::Program> program =
+	new osg::Program;
+program -> addShader( vertShader.get() );
+program -> addShader( fragShader.get() );
+program -> addShader( geomShader.get() );
+node -> getOrCreateStateSet() -> setAttributeAndModes(
+	program.get() );
+\end{lstlisting}
+
+\end{itemize}
+
+\section{Using uniforms}
+
+\begin{itemize}
+\item three types of inputs and outputs in a typical shader:\\
+\textrightarrow uniforms\\
+\textrightarrow vertex attributes\\
+\textrightarrow varyings\\
+
+\item Uniforms and Vertex Attributes are read-only during the sahder's exevution, but can be set by host OpenGL or OSG apps.
+
+\textrightarrow They are actually global GLSL variables used for interactions between shaders and user applications.\\
+
+\item Varyings are used for passing data from one shader to the next one\\
+\textrightarrow tehy are invisible to external programs\\
+\item OSG uses osg::Uniform class
+\end{itemize}
+
+\subsection{osg::Uniform class}
+\begin{itemize}
+\item used to define a SLSL uniform cariable
+\item constructor has a name and initial value param, which should match the definition in the shader souce code, e.g:
+
+\begin{lstlisting}
+float length = 1.0f;
+osg::ref_ptr<osg::Uniform> uniform = 
+	new osg::Uniform( "length", length );
+\end{lstlisting}
+
+\item add uniform object to state set, which has attached osg::Program object via addUniform():\\
+
+\begin{lstlisting}
+stateset -> addUniform( uniform.get() );
+\end{lstlisting}
+There should be a variable defined in one of the shader sources:\\
+\begin{lstlisting}
+uniform float length;
+\end{lstlisting}
+
+Otherwise, uniform cariable will not be availabel in either OSG programs or shaders.\\
+
+\item Uniforms can be any basic type, or any aggregation of types, such as Boolean, float, integer, 2D/3D/4D vector, matrix and various texture samplers.\\
+\item osg::Uniform class accepts all basic types with constructor and set() method.\\
+\textrightarrow additionally, osg::Matrix2 and osg::Matrix3\\
+
+\item to bind texture sampler ( used in shaders to represent a particular texture) you specify the texture mapping unit by using an unsigned int:\\
+\begin{lstlisting}
+osg::ref_ptr<osg::Uniform> uniform = 
+	new osg::Uniform( "texture", 0 );
+\end{lstlisting}
+
+\item there must already be an osg::Texture object at unit 0, as well as a samplet uniform in the shader source:\\
+\begin{lstlisting}
+uniform sampler2D texture;
+\end{lstlisting}
+\textrightarrow assume that it's a 2D texture that will be used to change the shader's executing behavior.
+
+\end{itemize}
+\subsection{Time for Action page 154}
+\subsection{What just happened?}
+basic alorithm for caroon shading:
+\begin{itemize}
+\item if there's a normal that is close to the light direction, the brightest tone\\ \textrightarrow color1 is used.
+\item as the angle between light direction and surface normal is increasing\\
+ \textrightarrow darker tones will be used (color2, color3, color4)\\
+\textrightarrow provides an intensity value for selecting tones.\\
+\textrightarrow all four tones are declares as 4D vectors in FRAGMENT SHADER and passed to osg::Uniform objects as osg::Vec4 variables in the user app.
+\end{itemize}
+
+\section{Working with the geometry shader}
+\begin{itemize}
+\item geometry shader is included into the OpenGL 3.2 core\\
+\textrightarrow in lower versions it is udes as an extension (\verb|GL_EXT_ geometry_shader4| ) which should be declared in the shader sourve code.
+\item geometry shader has new sdjacency primitives\\
+\textrightarrow can be used as arguments of osg::PrimitiveSet derived classes.\\
+\textrightarrow also requires setting up params in order to maipulate the shader operations:
+
+\begin{enumerate}
+\item \verb|GL_GEOMETRY_VERTICES_OUT_EXT|: nums of vertices that the shader will emit
+\item \verb|GL_GEOMETRY_INPUT_TYPE_EXT|: the primitive type to be sent to the shader
+\item \verb|GL_GEOMETRY_OUTPUT_TYPE_EXT|: primitive type to be emitted from the shader
+\end{enumerate}
+\textrightarrow osg::Program class's setPatameter() sets values for these params\\
+\textrightarrow 100 vertices wil be emitted from the shader to the primitive assembly processor in the rendering pipeline:
+\begin{lstlisting}
+program -> setParameter( GL_GEOMETRY_VERTICES_OUT_EXT, 100 );
+\end{lstlisting}
+\end{itemize}
+
+\subsection{Time for action - Generating a Bezier curve}
+P158
+\subsection{What just happened?}
+\begin{itemize}
+\item geometry shader defines a new primitive type \verb|GL_LINE_STRIP_ADJACENCY_EXT| which means a line strip with adjacency\\
+\textrightarrow first and last vertices provide adjacency information bur aren't visible as line segments.\\
+\textrightarrow thus we can use these two extra vertives as the endpoints of a Bezier curve and the others as control points\\
+\textrightarrow that is actually what we read from the GLSL variable \verb|gl_Position[0]| to \verb|gl_PositionIn[3]|.\\
+
+\item Cubic Bezier curve equation:\\
+%\begin{lstlisting}
+$P(t) = (1-t)^3 *P0 + 3 * t * (1-t)^2 * (1-t)*P2 + t^3 *P3 \; with \;  0 \leq t \leq 1$
+%\end{lstlisting}
+\end{itemize}
+See summary.
+\chapter{Viewing the World}
+Focus:
+\begin{itemize}
+\item understandig the coordinate system defined in OpenGL
+\item alternating the view point and orientation, projection frustum, and final viewport
+\item changing and controlling the rendering order if there exists more than one camera
+\item how to create single and composite viewers
+\item how to manage global dispay settings and generate easy-to-use stereo visualization effects
+\item how to apply the rendered scene as a texture object - so called rendering to textures (RTT)
+\end{itemize}
+
+\subsection{From world to screen}
+this subsection will be shorter, since a version of this is already in my personal notebook.
+
+\subsubsection{modelmatrix}
+used to describe the specific location of an object in the world.\\
+\textrightarrow transforms object's local coord sys to world coord sys. Both coord. systems are right-handed.\\
+
+\subsubsection{view matrix}
+\textrightarrow transforms entire world into view space.
+suppose we have a camera placed at a vertain position in the world; the inverse of the camera's transformation matrix is actually used as the view matrix.\\
+In the right-handed view coord sy, OpenGL defines that the camera is always located at the origin (0, 0, 0), and facing towards the negative Z axis.\\
+\textrightarrow Hence, we can represent the world on our camera's screen.\\
+
+\subsubsection{Note:}
+There is no separate model matrix or view matrix in Open GL.\\
+\textrightarrow however, it defines a model-view matrix to transform from the object's local space to view space, which is a combination of both matrices.\\
+\textrightarrow to transform vertex V in local space to Ve in view space, we have:\\
+$Ve = V * modelViewMatrix$
+
+\subsubsection{projection matrix}
+we have to:
+\begin{itemize}
+\item determine how 3D objects are projected onto the screen (perspective or orthogonal)
+\item calculate the frustum.\\
+\\
+\textrightarrow Projection matrix is used to specify the frustum in the world coordinate system with six clipping planes: left, right, bottom, top, near and far planes.\\
+\\
+\textrightarrow OpenGl function: gluPerspective(), determines a field of view with camera lens params.
+\item resulting coord sys is called: Normalized Device Coordinate System\\
+\textrightarrow it ranges from -1 to +1 in each of the axed.\\
+\textrightarrow is changed to left-handed now.
+\item as a final step:\\
+project all result data onto viewport. (the window)\\
+define the window rectangle in which the final image is mapped\\
+As well as Z Value of the window coordinates.
+\item Now the 3D scene is rendered to a rectangular area on your 2D screen. 
+
+\end{itemize}
+\subsubsection{MVPW matrix}
+
+Finally, the screen coord $Vs$ can represent the local vertex $V$ in the 3D world by using the so called MVPW matrix:\\
+
+$Vs = V * modelViewMatrix * projectionMatrix * windowMatrix$\\
+
+The $Vs$ is still a vector that represents a 2D pixel location with a depth value.\\
+By reversing this mapping process, we can get a line in the 3D space from a 2D screen point ($Xs, \; Ys$)\\
+\textrightarrow that's because th 2D point can actually be treated as two points: one on the near clipping plane $(Zs \; =0)$ and the other on the far plane $(Zs=1)$.\\
+
+The inverse of the MVPW matrix is used to obtain the result of the "unproject" work:\\
+$V0=(Xs, \; Ys, \; 0) \; * \; invMVPW$\\
+$V1 = (Xs, \; Ys, \; 1) \; * \; invMVPW$\\
+
+\subsection{The Camera class}
+\begin{itemize}
+\item it's popular to use glTranslate() and glRotate()\\
+\textrightarrow moves the scene
+\item it's popular to use gluLookAt()\\
+\textrightarrow moves the camera
+
+\item though they are all replaceable by glMultMatrix()\\
+\textrightarrow in fact, these functions do the same thing: calculate the model-view matrix for transforming data from world space to view space.
+\item similarly, OSG had osg::Transform class\\
+\textrightarrow adds or sets its own matrix to the current model-view matrix when placed in the sg 
+\item BUT: we always intend to operate on model matrix by using the\\
+\textrightarrow osg::MatrixTransform and osg::PositionAttitudeTransform subclasses\\
+\textrightarrow we handle the view matrix with the osg::Camera subclass.
+\item osg::Camera class is one of the most important classes in the core OSG libraries.\\
+\textrightarrow can bes used as Group node
+\item but it is far more than a common node\\
+\textrightarrow main functionalities in four categories:
+\begin{enumerate}
+\item osg::Camera class handles the view matrix projection matrix and viewpoert\\
+\textrightarrow affects all its chilfren and project them onto the screen\\
+Related methods:
+\begin{itemize}
+\item public: setViewMatrix() and setViewMatrixAsLookAt() methods set the view matrix by using the osg::Matrix variable or classic eye/center/up variables.
+\item public setProjectionMatrix() method accepts an osg::Matrix parameter in order to specify the projection matrix
+\item other convenient methods:\\
+\textrightarrow setProjectionMatrixAsFrustum()\\
+\textrightarrow setProjectionMatrixAsOrtho()\\
+\textrightarrow setProjectionMatrixAsOrtho2D()\\
+\textrightarrow setProjectionMatrixAsPerspective\\
+are used to set a perxpevtive or orthographic projection matrix with different frustum parameters.\\
+they work just like the OpenGL projection functions (..., see page 165)
+\item public setViewport() method defines a rectangular window area with an osg::Viewpoert object.
+\end{itemize}
+set view and projection matrix of a camera node, set its viewport to $(x,y) - (x+w, y+h)$:
+\begin{lstlisting}
+camera -> setViewMatrix( viewMatrix );
+camera -> setProjectionMatrix( projectionMatrix );
+camera -> setViewport( new osg::Viewport( x, y, w, h ) );
+\end{lstlisting}
+Obtain current view and projection matrices and viewpoert of the osg::Camera object by using the correspoinding get*() methods at any time, e.g.:
+\begin{lstlisting}
+osg::Matrix viewMatrix = camera -> getViewMatrix();
+\end{lstlisting}
+get position and orientation of view matrix:
+\begin{lstlisting}
+osg::Vec3 eye, venter, up;
+camera -> getViewMatrixAsLookAt( eye, center, up);
+\end{lstlisting}
+\item osg::Camera encapsulates the OpenGl functions, such as glClear(), glClearColor(), and glClearDepth(), and clears the frame buffers and presets their values when redrawing the scene to the window in every frame.\\
+Primary methods include:
+\begin{itemize}
+\item setClearMask() method, sets buffer to be cleared.\\default:
+\begin{lstlisting}
+GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
+\end{lstlisting}
+
+\item setClearColor() method sets the clear color in RGBA format, by using an osg::Vec4 variable.
+
+\item similarly there's setClearDepth(), setClelarStencil(), setClearAccum() (and their get*() methods)
+\end{itemize}
+
+\item test
+
+
+\end{enumerate}
+\end{itemize}
+
+
+\end{document}

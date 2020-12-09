@@ -49,9 +49,9 @@ void InfoVisitor::apply( osg::Node& node )
 //Be aware of the calling time of traverse() here,
 //which ensures that the level of each node in the tree is correct.
 
-void apply( osg::Geode& geode )
+void InfoVisitor::apply( osg::Geode& geode ) //InfoVisitor:: might be missing in tutorial pdf
 {
-	std::cout << geode.spaces() << geode.libraryName() << "::"
+	std::cout << spaces() << geode.libraryName() << "::"
 		  << geode.className() << std::endl;
 
 	_level++;
