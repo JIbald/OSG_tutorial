@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter07/P172_custom_sim_loop/main.cpp
+osgDB/ReadFile
+-
+osgGA/TrackballManipulator
+-
+osgViewer/Viewer
+-
+iostream
+-
+

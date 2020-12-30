@@ -463,4 +463,225 @@ The additional camera's goal is to implement a HUD scene that overlays the main 
 camera -> setClearMask( GL_DEPTH_BUFFER_BIT ); // no color buffer bit
 \end{lstlisting}
 
+\subsection{using a single viewer}
+
+OSG supports the single viewer class osgViewer::Viewer for holding a view on a single scene.\\
+setSceneData() method\\
+\textrightarrow manages the scene graph's root node\\
+
+
+run()\\
+\textrightarrow starts the simulation loop (scene is rendered per frame)
+\textrightarrow the frame buffer is updated continuously by the result of every rendering cycle (-> frame)\\
+
+the viewer also contains an osg::Camera object as the main camera.\\
+View Matrix of the camera is controlled by the viewer's internal osgGA::CameraManipulator object.\\
+
+User input events are received and handled by the viewer as well..\\
+\textrightarrow this works via a list of osgGA::GUIEventHandler handlers.\\
+
+The viewer can even be set up in full screen mode, in a window and onta a spherical display.
+
+\subsection{Digging into the simulation loop}
+The simularion loop defined by the run() method always has three types of tasks to perform:
+\begin{enumerate}
+\item specify the main camera's manipulator
+\item set up associated graphics contexts
+\item render frames in cycles
+\end{enumerate}
+
+The manipulator can read keyboard and mouse events and accordingly adjust the main camera's view matrix to navigate the scene graph.\\
+\textrightarrow set by using setCameraManipulator() method\\
+\textrightarrow param: osgGA::Cameramanipulator subclass\\
+e.g.:
+\begin{lstlisting}
+viewer.setCameraManipulator( new osgGA::TrackballManipulator );
+\end{lstlisting}
+
+\textrightarrow adds trackball(arc ball) manip to viewer object, (free motion behavious)\\
+\textrightarrow because camera manipulator is kept a smart pointer in the viewer, we can assign a new manip by using the setVameraMAnipulator() method any time.
+
+see page 170 for table with maipulators\\
+\textrightarrow beware , to declare and use a manip you should add the osgGA library as a dependence of your project\\
+\textrightarrow CMake scripts
+
+the graphics contexts of a viewer, as well as possible threads and resourfes, are all initialized ni the realize(0 method\\
+\textrightarrow automatically called before the first frame is rendered\\
+Now the viewer enters the loop:\\
+\textrightarrow each time frame() method is used to render a frame. It checks if the rendering process should stop and exit with the don() method. The process can be described with just a few lines of code:
+\begin{lstlisting}
+while( !viewer.done() )
+{
+	viewer.frame();
+}
+\end{lstlisting}
+
+\textrightarrow default rendering scheme used in the viewer class.\\
+Frame rate is synched to the monitor's refresh rate to avoid wasting system energy, if the vsync option of the gpu is on.\\
+OSG supports another on-demand rendering scheme:
+\begin{lstlisting}
+viewer.setRunFrameShceme( osgViewer::Viewer::ON_DEMAND );
+\end{lstlisting}
+noe the frame() method will only be executed when there are scene graph mods, updating processes, or user input events, until the scheme is changed back to the default value of CONTINUOUS.\\
+
+As an addition, the osgViewr::Viewer class also contains a setRunMaxFrameRate() method which uses a frame rate number as the param.\\
+\textrightarrow can set a max frame rate\\
+\textrightarrow controls viewer running to force rendering frames without lots of consumption.
+
+\subsection{Time for action - custom simulation loop}
+
+run() was used many times.\\
+\textrightarrow performed update, cull ad draw traversals each frame.\\
+\textrightarrow see P172.
+\subsection{What on earth just happended?}
+
+this was the concept of pre- and post-frame events and assume they are executed before and after frame() method.\\
+\textrightarrow inaccurate.\\
+
+multiple threads are used to manage user updating, culling and drawing of different cameras.\\
+\textrightarrow especially with multiple screens, processors, and gpu.\\
+frame() method only starts a new updating/culling/drawing traversal work, but does not take care of thread synchronization. In this case, the code before and after frame() will be considered unstable and unsafe, bevause they may conflict with other process threads when reading or writing the scene graph.\\
+\textrightarrow so the approach described here is not recommended for future development.\\
+\textrightarrow "correct" methods in next chapter.\\
+
+When will the viewer.done() return true?\\
+Of course, you can set the done flag via setDone() meghod of viewe
+OSG system will check if all present graphics contexts (for example, the rendering window)have been closed, or if the Esc key is pressed which will also change the done flag.\\
+setkeyEvenetSetsDone() method can even set which key is going to carry out the duty instead of the default Esc ( osr set this to 0 to turn off the feature).\\
+
+\subsection{Using a composite viewer}
+osgViewr::VIewer class manages only one single view on one scene graph.\\
+osgViewer::CompositeViewer class supports multiple views and multiple scenes.\\
+This has the same methods such as run(), frame() and done(0 to manage the rendering process, but also supports adding and removing independent scene views by using the addView() and removeView() meghods, and obtaining a view object at a specific index by using the getView() method. The view object here is defined by the osgViewer::View class.\\
+osgViewer::View class is the super class of osgViewer::Viewer\\
+\textrightarrow it accepts setting a root node as the scene data, and adding a camera manipulator and event handlers to make use of user events as well.\\
+Ther main difference between osg::Viewer::View and osgViewer::Viewer is that the former cannot be used as a single viewer directly - that is, it doesn't have run() or frame() methods.\\
+
+To add a created view object to the composite viewer:
+\begin{lstlisting}
+osgViewer::CompositeViewer multiviewer;
+multiviewer.addView( view );
+\end{lstlisting}
+
+\subsection{Time for action - rendering more scenes at one time}
+Multi-viewers are practical in representing comlex scenes, for instance, to render a wide area with a main view and an eagle eye view, or to display the front, side, top, and persepective views of the same scene. Here we eill create three separate windows, containintg three different models, each of which can be independently manipulated.
+\subsection{What the fuck just happened?}
+it's possible to create three osg::Camera nodes, add different sub-scenes to them, and attach them to different graphics contexts (rendering window) in order to achieve the same result as the previous image. \\
+\textrightarrow every osgViewer::View object has an osg::Camera node that can be used to manage its subscene and associated window.\\
+\textrightarrow it actually works like a container.\\
+
+However, the osgViewer::View class handles manipulator and user events, too.\\
+\textrightarrow in a composite viewer, each osgViewer::View object holds its own manipulator and event handlers (this will be siscussed in Chapter 9, Interacting with Outside Elements).\\
+However, a set of cameras can hardly interact with user inputs separately. That is why we choose to use a composite viewer and a few view objects to represent multiple scenes in some cases.
+
+\subsection{Changing global display settings}
+OSG manages a set of global display settings that are required by cameras, viewers, and other scene elements. It uses the singleton pattern to declare a unique instance of the container of all of these settings, by using the osg::DisplaySettings class. We can thus obtain the display settings instance at any time in our apps:
+\begin{lstlisting}
+osg::DisplaySettings* ds = osg::DisplaySettings::instance();
+\end{lstlisting}
+The osg::DisplaySettingsa instance sets up properties requested by all newly created rendering devices,  ainly OpenGL graphics contexts of rendering windows. Its chracteristics include:
+\begin{enumerate}
+\item setDoubleBuffer() method: set double or single buffering. Default is on.
+\item setDepthBuffer() method: whether to use depth buffer or not. Default is on.
+\item setMinimumNumAlphaBits() (and others): set bits for an OpenGL alpha buffer, a stencil buffer, accumulation buffer. Defaults are all 0.
+\item setNumMultiSamples(): set using multisampling buffers and number of samples. default is 0.
+\item enable stereo rendering and configure stereo mode and eye mapping parameters
+\end{enumerate}
+
+\textrightarrow some of these characteristics can be separately set for different graphics contexts by sing a specific traits structure. For now we use global display settings.
+
+\subsection{Time for action - enabling global multisampling}
+
+P180
+
+\subsection{wth just happened?}
+multisampling allows apps to create a frame buffer with a given number of samples per pixel.\\
+\textrightarrow contains color depth, stencil info.\\
+\textrightarrow more video memory is required but a better rendering result will be produced.\\
+OSG has an internal graphics context manager osg::GraphicsContext:\\
+\textrightarrow it's subclass osg::GraphicsWindowWin32 ( look up Linux version ) manages the config and creation of rendering windows under Windows.\\
+It will apply these two attributes to the encapsulated wglChoosePixelFormatARB() function and enable multisampling of the entire scene.\\
+osg::DisplaySettings actually works like a default value set of various display attributes. If there is no separate setting for a specific object, the default one will take effect; Otherwise the osg::DisplaySettings instance will not be put to use.\\
+We are going to talk about the separate settings for creating graphics context and the osg::GraphicsContext class in Chapter 9
+
+\subsection{Stereo visualization}
+We have already experienced the charm of stereoscopic 3D films and photographs.\\
+\textrightarrow James Cameron's Avatar\\
+Anaglyph image is the earliest and most popular method of presenting stereo visualiyation. \\
+others: NVIDIA's quad-buffering, horizontal or vertical split, horizontal or vertical interlace, ...\\
+Fortunately, OSG supports most of these common stereo techniques, and can immediately relize one of them in the viewer with just a few commands:\\
+
+\begin{lstlisting}
+osg::DisplaySettings::instance() -> setStereoMode( mode );
+osg::DisplaySettings::instance() -> setStereo( true );
+\end{lstlisting}
+
+The method setSteroMode(0 selects a stereo mode from a set of enumerations, and the setStereo() meghod enables or disables it. Available stereo modes in OSG are: \verb|ANAGLYPHIC, QUAD_BUFFER (NVIDIA ) , HORIZONTAL_SPLIT, VERTICAL_SPLIT, HORIZONTAL_INTERLACE, VERTICAL_INTERLACE, and CHEKERBOARD| (DLP projector).\\
+You may also use \verb|LEFT_EYE or RIGHT_EYE| to indicate that the screen is used for left-eye or right-eye views.\\
+for more stereo params, such as the eye separation, have a look at the API documentation.
+
+\subsection{Time for action - rendering naglyph stereo scenes}
+P183
+
+\subsection{wtf just happened?}
+in the \verb|ANAGLYPHIC| mode, the final rendering result is always made yp of two color layers, with a small offset to produce a depth effect. Each eye of the glasses will see aslightly different picture, and their composition produces a sterograph image, which will be fused by our brain into a three dimensional scene.\\
+OSG suports the anaglyphic stereo mode with a two-pass rendering scheme. The first pass renders the left eye image with a red channe color mast, and the second pass renders the right eye image with a cyan channel. the color mask is defined by the rendering attribute osg::ColorMask. It can be easily applied to state sets of nodes and drawables by using:
+
+\begin{lstlisting}
+osg::ref_ptr <osg::ColorMask> colorMask = new osg::ColorMask;
+colorMask -> setmask( true, true, true, true );
+stateset -. setAttribute( colormask.get() );
+\end{lstlisting}
+
+stero mode often causes the scene graph to be rendered multiple times, which sloes down the frame rate as a side effect.
+
+\subsection{Rendering to textures}
+the render to textures technique allows developers to create textures based on a sub-scene's appearance in the rendered scene.
+These textures are then "baked"into objects of coming scg via texture mapping. They can be used to create nice specital effects on the fly, or can be stored for subsequent deferred shading, multi-pass rendering, and other advanced rendering algorithms.\\
+To implement texture baking dynamically, there are generally three steps to follow:
+\begin{enumerate}
+\item Create the texture for rendering.
+\item Render the scene to the texture.
+\item Use the texture as you want.
+\end{enumerate}
+
+We have to create an empty texture object before putting it into use. OSG can create an empty osg::Texture object by specifying its size. The setTextureSIze() method defines the width and height of a 2D texture, and an additional depth parameter of a 3D texture.\\
+
+The key to rendering a scene graph to the newly created texture is the attach() method of the osg::Camera class. This accepts the texture object as an argument, as well as a buffer component parameter, which indicates which part of the frame buffer will be rendered to the texture. For example, to attach the color buffer of a camera's sub-scene to the texture, we use:
+\begin{lstlisting}
+camera -> attach ( osg::Camera::COLOR_BUFFER, texture.get() );
+\end{lstlisting}
+
+Other usable buffer components include the \verb|DEPTH_BUFFER|, \verb|STENCIL_BUFFER| and \verb|COLOR_BUFFER0| to \verb|COLOR_BUFFER15|(multiple render target outputs, depending on the gpu).\\
+Continue setting suitable view and projection matrices of this camera, and a viewpoer to meet the texture size, and set the texture as an attribute of nodes or draeables. The texture will be updated with the camera's rendering result in every frame, dynamically carying with the alteration of the view matrix and the projection matrix.\\
+Be aware that the main camera of a viewer is not suitable for attaching a texture. Otherwise there will be no ouputs to the actual window, which will make the screen pitch-dark. Of course, you ay ignore this if you are doing off-screen rendering and on't care of any visual effects.
+
+\subsection{Frame buffer, pixel buffer, and FBO}
+A concern is how to get the rendered frame bufdfer image into the texture object. A direct approach is to use the glReadpixels() method to return pixel data from the fram buffer, and apply the result to a glTexImage*() method.\\
+\textrightarrow easy to conceptualize and use, but will always copy data to the texture object, which is extremely slow.\\
+
+The glCopyTexSubImage() method would be better in terms of improving the efficiency. However, we can still optimize the process. Rendering the scene directly to a target other than the frame buffer is a good idea. There are mainly two solutions for this:
+\begin{enumerate}
+\item the pixel buffer (pbuffer for short) extension can create an invisible rendering buffer with a pixel format descriptor, which is equivalent to a window. It should be destroyed after being used, as is done for the rendering window.
+\item The frame buffer object (FBO for shor), which is sometimes better than pixel buffer in saving the storage space, can add application-created fram buffers and redirect the rendering output to it. It can either output to a texture object or a renderbuffer object, which is imply a data storage object.
+\end{enumerate}
+
+OSG supports making use of different render target implementations: directly copying from the frame buffer pixel buffer, or FBO. It uses the method setRenderTargetImplementation() of the osg::Camera class to selsect a solution from them, for example:
+
+\begin{lstlisting}
+camera -> setRenderTargetImplementation( osg::Camera::FRAME_BUFFER );
+\end{lstlisting}
+
+This indicates that the rendering result of Camera will be rendered to the attached texture by using the glCopyTexSubImage() method internally. In fact, this is the default setting of all camera nodes.\\
+Other major implementations include \verb|PIXEL_BUFFER| and \verb|FRAME_BUFFER_OBJECT|
+
+\subsection{TFA - drawing aircrafts on a loaded terrain}
+In this section , we are going to integrate what we learned before to create a slightly complex example, which identifies all texture objects in a scene graph by using the osg::NodeVisitor utility, replaces them with a newly created shared texture, and binds the new texture to a render-to-textures camera. the texture is expected to represent more than a static image, so a customized simulation loop will be used to animate the sub-scene graph before calling the frame() method.
+
+
+
+
+
+
+
 \end{document}

@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter07/P186_aircrafts_loaded_terrain/main.cpp
+osg/Camera
+-
+osg/StateAttribute
+-
+osg/Texture2D
+-
+osgDB/ReadFile
+-
+osgGA/TrackballManipulator
+-
+osgViewer/Viewer
+-
+

@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter07/P183_anaglyph_scene/main.cpp
+osg/DisplaySettings
+-
+osg/ref_ptr
+-
+osgDB/ReadFile
+-
+osgViewer/Viewer
+-
+
