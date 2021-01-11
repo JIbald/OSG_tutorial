@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter11/P301_3Dtexts_in_WorldSpace/main.cpp
+osg/MatrixTransform
+-
+osgDB/ReadFile
+-
+osgText/Font3D
+-
+osgText/Text3D
+-
+osgViewer/Viewer
+-
+

@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter11/P297_cessna_description/main.cpp
+osg/Camera
+-
+osgDB/ReadFile
+-
+osgText/Font
+-
+osgText/Text
+-
+osgViewer/Viewer
+-
+

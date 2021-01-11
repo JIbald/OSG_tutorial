@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter08/P199_drawing_geometry_dynamically/main.cpp
+osg/Geometry
+-
+osg/Geode
+-
+osg/NodeVisitor
+-
+osgViewer/Viewer
+-
+

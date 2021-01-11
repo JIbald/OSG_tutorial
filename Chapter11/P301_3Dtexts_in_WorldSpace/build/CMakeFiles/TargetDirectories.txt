@@ -1,0 +1,3 @@
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter11/P301_3Dtexts_in_WorldSpace/build/CMakeFiles/rebuild_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter11/P301_3Dtexts_in_WorldSpace/build/CMakeFiles/edit_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter11/P301_3Dtexts_in_WorldSpace/build/CMakeFiles/MyProject.dir

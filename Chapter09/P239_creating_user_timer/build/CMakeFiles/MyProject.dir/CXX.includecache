@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter09/P239_creating_user_timer/main.cpp
+osg/Switch
+-
+osgDB/ReadFile
+-
+osgGA/GUIEventHandler
+-
+osgGA/GUIActionAdapter
+-
+osgViewer/Viewer
+-
+iostream
+-
+

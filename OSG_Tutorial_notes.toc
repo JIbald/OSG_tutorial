@@ -44,3 +44,47 @@
 \contentsline {subsection}{\numberline {7.1.18}Frame buffer, pixel buffer, and FBO}{28}%
 \contentsline {subsection}{\numberline {7.1.19}TFA - drawing aircrafts on a loaded terrain}{29}%
 \contentsline {subsection}{\numberline {7.1.20}Summary}{29}%
+\contentsline {chapter}{\numberline {8}Animating Scene Objects}{30}%
+\contentsline {section}{\numberline {8.1}Overview}{30}%
+\contentsline {section}{\numberline {8.2}Taking references to functions}{30}%
+\contentsline {section}{\numberline {8.3}List of callbacks}{31}%
+\contentsline {section}{\numberline {8.4}P195 switch nodes update traversal}{31}%
+\contentsline {section}{\numberline {8.5}WTF just happened?}{31}%
+\contentsline {section}{\numberline {8.6}Avoiding conflicting mods}{32}%
+\contentsline {section}{\numberline {8.7}TFA P199 drawing a geometry dynamically}{33}%
+\contentsline {section}{\numberline {8.8}wtfjh}{33}%
+\contentsline {section}{\numberline {8.9}understanding wase motions}{33}%
+\contentsline {section}{\numberline {8.10}Animatin the transformation nodes}{34}%
+\contentsline {section}{\numberline {8.11}TFA - making use of the animation path}{35}%
+\contentsline {section}{\numberline {8.12}wtf happened?????}{35}%
+\contentsline {section}{\numberline {8.13}have a go hero}{36}%
+\contentsline {section}{\numberline {8.14}Changing rendering states}{36}%
+\contentsline {section}{\numberline {8.15}TFA fading in}{37}%
+\contentsline {chapter}{\numberline {9}Interacting with Outside Elements}{38}%
+\contentsline {section}{\numberline {9.1}Various events}{38}%
+\contentsline {section}{\numberline {9.2}Handling mouse and keyboard inputs}{39}%
+\contentsline {section}{\numberline {9.3}TFA - Driving the cessna}{39}%
+\contentsline {section}{\numberline {9.4}Handling events within nodes}{39}%
+\contentsline {section}{\numberline {9.5}Adding customized events}{40}%
+\contentsline {section}{\numberline {9.6}TFA - creating a user timer}{40}%
+\contentsline {section}{\numberline {9.7}picking objects}{40}%
+\contentsline {section}{\numberline {9.8}INTERSECTION}{41}%
+\contentsline {chapter}{\numberline {10}saving and loading files}{42}%
+\contentsline {section}{\numberline {10.1}understanding file I/O plugins}{42}%
+\contentsline {section}{\numberline {10.2}discovery of specified extension}{42}%
+\contentsline {section}{\numberline {10.3}supported file formats}{43}%
+\contentsline {section}{\numberline {10.4}the pseudo loader}{43}%
+\contentsline {section}{\numberline {10.5}tfa reading files from the Internet}{43}%
+\contentsline {section}{\numberline {10.6}writing your own plugins}{43}%
+\contentsline {chapter}{\numberline {11}developing visual components}{44}%
+\contentsline {section}{\numberline {11.1}creating billboards in a scene}{44}%
+\contentsline {section}{\numberline {11.2}TFA creating banners facing you}{45}%
+\contentsline {section}{\numberline {11.3}creating texts}{45}%
+\contentsline {section}{\numberline {11.4}TFA - writing cessna description}{45}%
+\contentsline {section}{\numberline {11.5}creating 3D texts}{45}%
+\contentsline {section}{\numberline {11.6}tfa - 3D texts in world space}{45}%
+\contentsline {section}{\numberline {11.7}particle animations}{46}%
+\contentsline {chapter}{\numberline {12}Improving Rendering Efficiency}{48}%
+\contentsline {section}{\numberline {12.1}Learn goals}{48}%
+\contentsline {section}{\numberline {12.2}OpenThread Basics}{48}%
+\contentsline {section}{\numberline {12.3}TFA: using a separate data receiver thread}{49}%

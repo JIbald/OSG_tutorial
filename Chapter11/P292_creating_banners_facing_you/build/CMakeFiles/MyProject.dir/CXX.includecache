@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter11/P292_creating_banners_facing_you/main.cpp
+osg/Billboard
+-
+osg/Texture2D
+-
+osgDB/ReadFile
+-
+osgViewer/Viewer
+-
+

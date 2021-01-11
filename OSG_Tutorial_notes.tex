@@ -680,7 +680,459 @@ In this section , we are going to integrate what we learned before to create a s
 
 \subsection{Summary}
 
-est
+\chapter{Animating Scene Objects}
+
+OSG 's toolkits for real time animation:
+\begin{itemize}
+\item transformation animation
+\item key-frame animation
+\item skeletal animation
+\item and so on
+\end{itemize}
+
+\section{Overview}
+\begin{itemize}
+\item callback concepts and usage
+\item ease morions in different situations
+\item simple path animations
+\item complex key-frame and animarion channel systems
+\item generate character animations with skeleton system
+\item implement rendering state and texture animations
+\end{itemize}
+
+\section{Taking references to functions}
+last chapter, animation via the sub-scene graph for dynamically rendering to textures.\\
+\textrightarrow NON-RECOMMENDED: update the view matrix of the render-to-textures camera in the post-frame events \textrightarrow major issue: is in multithread context.\\
+"post0frame"events may overlap with separated cull or draw threads, thus causing data access conflicts\\
+To avoid those conflicts, we may consider employing a reference of these animating functionalities for the update traversal and let OSG decide the execution timeline and when to call these functionalities according to the reference. The reference passed to an executable code fragment is called a callback.\\
+
+A callback triggered in the update traversal is called an \textbf{update callback}. There is also an \textbf{event callback} and a \textbf{cull callback} for executing in event and cull traversals, respectively. Instead of just using the address of functions as their references, OSG provides its own implementation of the execution operation, which is called functor. To customize the execution code, we have to override the callbacka functor's key operator or method, and attach it to a suitable scene object, for instance, a node or a drawable.
+
+\section{List of callbacks}
+There are several kinds of callbacks in the OSG scene graph and backend. Among them, the \textbf{osg::NodeCallback} class is an important implementer of update, event, and cull callbacks. It can be only attached to nodes. For srawables, we have \textbf{osg::Drawable::UpdateCallback, osg::Drawable::EventCallback} and \textbf{osg::Drawable::CullCallback} to achieve the same.
+
+\section{P195 switch nodes update traversal}
+what it says mate.
+
+\section{WTF just happened?}
+traverse(0 so far had two purposes:\\
+\textrightarrow customizing nodes by overriding the traverse() method for own-exec code;\\
+\textrightarrow callin gthe traverse(*) method of the osg::NodeVisitor class in order to continue the traversal while implementing node visitor
+Although these two oc urences have different params, they actually represent the same processing pipeline.
+
+firstly, the traverse() method of node visitors, which has a single osg::Node param, simply calls the node's traverse() virtual method and passes itself as an argument.
+
+Secondly, the node's traversing method must call its super calss's traverse() at the end of the implementation.it will then determine if there are child nodes to be traversed with the current visitor object (using the accept() method of child nodes).
+
+Finally, the visitor in turn calls the apply() virtual method to receive various types of nodes as its argument, and realizes customized visiting behaviours thereafter. Since each apply() method must call the cisitor;s traverse() to end itself, the cycle comes back to the first step, until the whole scene graph is traversed. The entire diagram can be explained with following image:
+
+P198
+
+the callback's operator() method calls its traverse() in the third form, with a visitor and a node parameter. However, there is no need to worry about the complexity, as the only work it performs is to call the traverse() method of the visitor and continue the traversal. If you fail to call this in the callback's method, the traversal will simply be stopped and will return from current node at once.
+
+\textrightarrow use addUpdateCallback() instead of setUpdateCallback() since it allows more Callbacks to be added later on.
+
+\section{Avoiding conflicting mods}
+osg can make the \textbf{draw traversal} which transfers data to the OpenGL pipeline run in a separated thread. It must be synched with other draw traversals in every frame, but part of the draw trav can usually overlap the \textbf{udate trav} coming grom the next grame, which improves the rendering efficiency and reduces frame latency.\\
+\textrightarrow frame() method of osgViewer::Viewer will return while the drawing work is still active. Data changes in update callbacks could then conflict with the unfinished rendering procvess and cause unexpected behaviors, and even crashes.
+
+\textbf{solution:}
+the setDataCariance() method, which belongs to the osg::Object class - the base class of all scene objects - This can be set to one of three enum values: UNSPECIFIED (default), STATIC, DYNAMIC.\\
+\textrightarrow DUNAMIC obj in the sg must be processsed at the beginning of the \textbf{draw trav} That is, the rendering backend should ensure all nodes and scene objects that are specified as DYNAMIC have finished being drawn before starting the next frame's update and cull traversals.
+However, STATIC objects, which are considered to be unchanged during updating and drawindf , can thus be rendered later and won't hold back the fdrame rate.
+
+By default, any newly-allocated objects are set to UNSPECIFIED, including nodes, drawables, state sets, and attributes. This allowsd OSG to predict the data variance.
+Reset like this:\\
+\begin{lstlisting}
+node -> setDataVariance( osg::Object::DYNAMIC );
+\end{lstlisting}
+
+\section{TFA P199 drawing a geometry dynamically}
+
+see p199 dear friend hihihi
+
+\section{wtfjh}
+remove setDataVariance() line \textrightarrow example still runs perfectly.\\
+Tha's because UNSPECIFIED objedcts can decide if they will be dynamically modified in callbacks or not, and reset the data cariance to DYNAMIC automatically.
+
+Change enum DUNAMIC to STATIC\\
+\textrightarrow occasionally the renderinf result is flickering and there is an OpenGL error message "invalid operation" from the console. Those are acaused by thread conflicts.\\
+
+Without calling dirtyDisplayList() method, OSG will ignore all dynamic drawable changes and make use of the \textbf{display list} commands storing the previous vertex and primitive data.\\
+Also, without the dirtyBound() OSG will not know if the bounding box no longer firs the drawable size, and will make mistakes when doing view frustum culling work.\\
+
+\section{understanding wase motions}
+train from station A to B takes 15 minutes.\\
+we want to simulate this by altering the transformation matrix of the train in an \textbf{update callback}.
+\textrightarrow put the train at station A at time point 0, and at station B at time point 15 (minutes) \\
+\textrightarrow move it evenly in transition phase.\\
+A heavily-employed method used here is the \textbf{linear interpolation} \\
+\textrightarrow draws a straight line between two neighboring samples P0 and P1, returns the appropriate point P along the line, which can be used to represent translation and scale operations of nodes. It is commonly expressed in the followinf form:\\
+$P = ( 1 - t ) * P0 + t * P1$\\
+\textrightarrow t is between 0 and 1\\
+Unfortunately, the motion of a train is usually much more complex. It starts from station A, accelerates slowly, drives at an even speed, decelerates, and finally stops at station B. In that case lin interpol is shit.\\
+
+\textrightarrow we have \textbf{ease motions} or ease functions. These are mathematical functions that are used to interpolate values between two endpoints. An ease motion usually generates non-linear results, in order to produce more natural effects.\\
+The \textbf{osgAnimation} library defines a number of built-in ease motions. Each of them has at least two arguments: start value (usually 0) and a duration (usually 1) \textrightarrow produces results in the range [start value, start value + duration] .\\
+They can be applied to the start ( lnMotion), to the end ( OutMotion), or to both start and end of the animation (lnOut Motion). We will list them in the following table:
+P 204\\
+
+To create a linear interpolation motion obj, we just type:\\
+\begin{lstlisting}
+//Start value is 0.0, and duration time is 1.0
+osg::ref_ptr <osgAnimation::LinearMotion> motion = new osgAnimation::LinearMotion( 0.0f, 1.0f );
+\end{lstlisting}
+
+The examples/osganimationeasemotion file in the OSG sourcve code can help you to discover these e ease motions graphically.
+
+\section{Animatin the transformation nodes}
+path animations are the most commonly-used animations in graphics apps.\\
+They can be used to describe a running car, a flight, a rotating ball, or the camera's motion. The path should always be set up first ( position, rotation, scale values at different key time nodes)\\
+When simulation loop is running, a transition state is calculated every frame, using the linear interpolation for pos and scale vectors, and \textbf{spherical linear interpolation} for the rotation quaternion. The slerp() method of osg::Quat is used internally here.\\
+
+OSG provides the osg::AnimationPath class to encapsulate a time varying transformation path. It has an insert() method that can be used to insert a control point at a specific time. A control point, declared by the osg::AnimationPath::ControPoint class, accepts a pos value and optional rotation and scale values in order to construct the animation path. e.g.:
+\begin{lstlisting}
+osg::ref_ptr<osg::AnimationPath> path = new osg::AnimationPath;
+path -> insert ( t1, osg::AnimationPath::ControlPoint( pos1, rot1, scale1 ) );
+path -> insert( t2, .. );
+\end{lstlisting}
+
+t1 and t2 are time nodes in seconds, and rot1 is an osg::Quat variable for representing the rotation of a object.\\
+
+Besides that, we can set up the loop mode of the animation path with the setLoopMode() method. The default value is LOOP, that is, the animation will continuously run on the preset path over and over again.This param can be changed to \verb|NO_LOOPING| (run once) or SWING (create a ping-pong path for other purposes.\\
+
+After that, we attach the osg::AnimatrionPath object to a built-in osg::AnimationPathCallback object which is actually derived from osg::NodeCallback, and can help developers to control their animating scenes in an intuitive way.\\
+
+\section{TFA - making use of the animation path}
+
+P205
+
+\section{wtf happened?????}
+The osg::AnimationPath class uses a getMatrix() method to compute and
+return a transitional transformation matrix according to the two control points just
+before and after a given time. It is then applied to the host osg::MatrixTransform ,
+osg::PositionAttitudeTransform , or osg::Camera node in order to make it move
+along the path. This is done by the osg::AnimationPathCallback class, which is actually
+an update callback for a specific purpose.
+
+If the osg::AnimationPathCallback object is attached to any kind of nodes other
+than transformation nodes previously described, it will become invalid. It is also not
+suggested to use the animation path callback as event or cull callbacks, as this may lead
+to unexpected results.
+
+\section{have a go hero}
+An animation must be able to be stopped, reset, and fast-forwarded, which makes it easy to
+be controlled by users. The osg::AnimationPathCallback class provides the reset() ,
+setPause() , setTimeMultiplier() , and setTimeOffset() methods to implement
+these common operations. For example, to restart a preset animation path, callback apcb at
+any time:
+apcb->setPause( false );
+apcb->reset();
+In order to set the time offset to 4.0s and move forward through the animation at a 2x
+speed, just use:
+Apcb->setTimeOffset( 4.0f );
+apcb->setTimeMultiplier( 2.0f );
+Now, can you figure out how to create your own path animation player?
+
+\section{Changing rendering states}
+redering states can be animated too. A number of effects can be generated by altering the proprties of one or more rendering attributes, including fade-in and fade-out, density and variation of the atmosphere, fog, changing the direction of light beams, and so on.
+We can easily implement a state animation in the \textbf{update callback}. We may either tetrieve the attribute object from the arguments of the overridden method or just manage the object as a member variable of the user-defined callback. Remember to make use of \textbf{smart pointers} to ensure that the member attribute won't be automatically destroyed if it is no longer referenced.\\
+
+The ease motion classes can be used to improve the animation quality. We must allocate an ease motion object with the start value and duration params and update it with a delta time as the time step size. For example:
+
+\begin{lstlisting}
+osg::ref_ptr<osgAnimation::LinearMotion> motion = new osg::Animation::LinearMotion( 0.0, 10.0 );
+...
+motion -> update( dt );
+float value = motion -> getValue();
+\end{lstlisting}
+
+This creates a linear motion object with the X axis (time) ranging from 0.0 to 10.0. \\
+The getValue() method uses specific formula on the current X value, and obtains a corresponding Y value.\\
+
+You should add the osgAnimation library as a dependence if you would like the wase motion and more functionalities to be used in your projects.
+
+\section{TFA fading in}
+P209
+
+\chapter{Interacting with Outside Elements}
+
+OSG has a GUI abstraction library.\\
+\textrightarrow centralizes different windowing systems (MFC, Qt, GLUT, ...)\\
+\textbf{This chapter:} How OSG interacts with other elements, for instance, input devices and windowing systems.
+
+\begin{itemize}
+\item How to handle keyboard, mouse, ... events with \textbf{customized event handers}
+\item create and handle user-defined events
+\item understand the intersection test of scene objects
+\item configure window traits, graphical context
+\item integrate rendered scene into windowing system
+\end{itemize}
+
+\section{Various events}
+GUI is a type of interface object that allows computer users to interact with programs in many ways via \textbf{GUI events}.\\
+\textbf{widget element} is defined to receive these user actions and transfer them to an event handler object.\\
+Event handler is written by high-level devs to implement specific functionalities(pop up dialogs, dave current content of text editor.\\
+\textbf{problem?} most gui frameworks not compatible with each other. \textrightarrow not convenient for direct use in OSG app.\\
+\textrightarrow OSG provides basic interface for anyone qho wants to handle GUI Events: osgGA::GUIEventHandler.\\
+osgGA::GUIEventHandler should be attached to the sg with addEventHandler() and removed with removeEventHandler()\\
+\textrightarrow a kind of callback that will automatically be called during the \textbf{event traversal} (Chapter05).\\
+
+P232 When inheriting osgGA::GUIEventHandler to implement your own event handlers, the most important work is to override the handle() method.\\
+\textbf{it has two arguments}
+\textrightarrow osgGA::GUIEventAdapter parameter that supplies the received events\\
+\textrightarrow osgGA::GUIActionAdapter parameter for feedback
+
+\section{Handling mouse and keyboard inputs}
+The osgGA::GUIEventAdapter class manages many osg supported events.\\
+The getEventType() method returns the
+current GUI event stored in an event adapter. Every time the overriding handle() method
+is called, we have to check this first to determine the event type and take appropriate
+countermeasures.\\
+
+table with main event types in OSG and related methods used to get necessary event arguments.\\
+\textrightarrow p233\\
+
+There is another getModKeyMask() method (returns \verb|MODKEY_CTRL|, \verb|MODKEY_SHIFT|,... as bool).\\
+Check if CTRL is pushed:
+\begin{lstlisting}
+if ( ea.getModKeyMask()&osgGA::GUIEventAdapter::MODKEY_CTRL )
+{
+... // Related operations
+}
+\end{lstlisting}
+
+\section{TFA - Driving the cessna}
+see P234
+
+\section{Handling events within nodes}
+Node callbacks can directly perform node operations according to future user events, for
+example, moving the node when the user is pressing a key. Event handlers are more generic.
+They are useful in configuring global settings and handling events for all kinds of scene
+elements.
+In this example, event callback is easier to implement than event handlers, but remember,
+too many callbacks may also cause performance problems.
+
+\section{Adding customized events}
+OSG uses internal event queueto monage coming GUI events in a FIFO list.\\
+handle() method of each added event handler will be executed as many times as the size of the event queue.\\
+The event queue class, named osgGA::EventQueue , allows
+new events to be pushed in with the addEvent() method at any time. Its argument is an osgGA::GUIEventAdapter pointer, which uses setting methods like setEventType()and setButton() to define its behavior.\\
+
+userEvent() method, which
+adapts user-defined events with a user data pointer as the argument. This user data can be
+used to represent any kind of customized event, for instance, the timer event described in
+the following section.\\
+
+It is of no use to create a completely new event queue object. The viewer class has already
+defined one to operate on:
+viewer.getEventQueue()->userEvent( data );
+Here, the variable data is an object derived from osg::Referenced . After adding this new
+event, the event handler will receive a USER event and developers can then read from the
+getUserData() method of the handler and do anything they want.\\
+
+\section{TFA - creating a user timer}
+see p239
+
+\section{picking objects}
+picking functionality can allow user to click a button with mouse in rendered scene. shooting, closing door, ...\\
+3 steps required:
+\begin{enumerate}
+\item event handler receives mouse events. e.g. mouse push comes with x and y positions of the cursor.
+\item which part of sg is under cursor. \textbf{osgUtil} provides intersection tools. This includes set of intersections including the picked drawable, its parent node path, intersecting point and so on.
+\item intersection result helps picking objects or making them fight.
+\end{enumerate}
+
+\section{INTERSECTION}
+uses node visitor mechanism to reduce time.\\
+more efficient than OpenGL's selection feature.\\
+\textrightarrow osgUtil::INtersectionVisitor (dervied from osg::NodeVisitor)\\
+\textrightarrow tests nodes' bounding volumes against the input intersector\\
+
+The osgUtil::IntersectionVisitor object takes an osgUtil::Intersector derived
+object as the argument of its constructor.
+
+\textrightarrow see page 244 for the coordinate system table
+
+\chapter{saving and loading files}
+\begin{itemize}
+\item file I/O mechanism implemented in OSG
+\item list of supported file formats
+\item OSG pseudo loaders
+\item cusomize OSG plugin interface / user - defined formats
+\item class wrappers for seriaized I/O of OSG native formats
+\end{itemize}
+
+\section{understanding file I/O plugins}
+I/O naming convention: .osg file format example: under Windows: \verb|osgdb_osg.dll| Under Linux it's \verb|osgdb_osg.so| Both with prefix \verb|osgdb_| and the following name represents the file extension\\
+required data files must exist in specified relative or absolute paths or in the OSG serach path defined by the environment variable \verb|OSG_FILE_PATH.|\\
+
+\section{discovery of specified extension}
+seaching and location a plugin for the handling of a specified file type, 2 steps:
+
+\begin{enumerate}
+\item plugin list in osgDB::Registry class.\\
+designed as singleton. instance() method to obtain.\\
+chain-of-responsibility design: each plugin (called reader-writer in OSG) tries to process extension of input file, and pass it off to the next plugin in the list if the extension is unrecognizable to that plugin.\\
+
+\item if all reader-writers fail, OSG will use the extension as a keyword to find plugin from external shared module.\\
+that is the \verb|osgdb_<ext>| library file. \verb|<ext>| represents extension string example: p 265\\
+define extension string with FileExtensionAlias() method.\\
+
+\end{enumerate}
+
+\section{supported file formats}
+huge list on p.266 - 270.
+
+\section{the pseudo loader}
+extension makred as \textbf{pseudo-loader} means they are not file extensions, but add asuffix to the end of the real filename to indicate the file should be read by the specified plugin example on p270.\\
+some pseudo loaders need/have parameters. example p270.
+
+\section{tfa reading files from the Internet}
+
+
+\section{writing your own plugins}
+extending the virtual reader-writer interface, OSG allows custom file formats.\\
+\textrightarrow the virtual interface is defined by the osgDB::ReaderWriter class.\\
+\textrightarrow it has several important virtual methods to be used or re-implemented to achieve reading and writing functionalities.\\
+see page 276.\\
+
+for the implementation of the readNode() method read p277 example.\\
+
+readNode() returns: osgDB::ReaderWriter::ReadResult, which isn't intuitive, doesn't return node pointer.\\
+You essentially test the result and then return the node if correct.\\
+
+\chapter{developing visual components}
+
+\begin{itemize}
+\item create geometries as billboards
+\item text in scene (2D/3D)
+\item design particle system = animation
+\item cast shadows on scene objects
+\item theory and implementation of special effects
+\end{itemize}
+
+\section{creating billboards in a scene}
+billboard + 2D image always facing a designated direction.\\
+used for many special effects (explosions, flares, sky, clouds, trees)\\
+\textrightarrow any object can be treated as a billboards with itself cached as the texture, while looking from a distance.\\
+\textrightarrow very popular\\
+\textrightarrow osg::BillBoard class. Derived from osg::Geode. All it's children (osg::Drawable objects) face designated direction (viewer's viewpoint, ...).\\
+\textbf{important method:} setMode(). Used to determine the rotaion behavior, with following enums: \verb|POINT_ROT_EYE, OPINT_ROT_WORLD, AXIAL_ROT| (explanation p.292)\\
+Drawables in the osg::BillBoard node should have a pivot point position, which is specified via the overloaded addDrawable() method: 
+\begin{lstlisting} 
+billboard->addDrawable( child, osg::Vec3(1.0f, 0.0f, 0.0f) ); 
+\end{lstlisting}
+Drawables also need unified initial front face orientation, used for computing rotation values. Initial orientation isi set by setNormal(). Each added drawable must ensure that its front face orientation is int he same firection as this normal value; otherwise the billboard results may be incorrect.
+
+\section{TFA creating banners facing you}
+
+\section{creating texts}
+important for vr. Stats on screen, labeling 3D objects, logging, debugging..\\
+texts have a font, size, alignment, layout (left-to-right, right-to-left, ...), resolution,...\\
+OpenGL doesn't support this, but OSG dows.\\
+\textbf{osgText} library implements font and text. Requires \verb|osgdb_freetype| plugin\\
+\textrightarrow plugin can load and parse true type fonts (freetype dependancy).\\
+\textrightarrow returns an osgText::Font instance. \\
+\textbf{entire process:} can be described with osgText::readFontFile() function.\\
+osgText::Textbase class is the pure base class of all OSG text types.\\
+Derived from osg::Drawable.\\
+no support for display lists by default.\\
+sublclass osgText::Text is used to manage glat characters in the world coord.\\
+\textbf{important methods:} setFont(), setPosition(), setCharacterSize(), setText();\\
+
+\section{TFA - writing cessna description}
+
+\section{creating 3D texts}
+OSG also provides support for 3D texts in the scene graph. Each character
+will be extruded with a depth parameter and finally rendered with OpenGL's vertex
+array mechanism. The implementer class, osgText::Text3D , is also derived form
+osgText::Textbase and thus has nearly the same methods as osgText::Text . It
+requires an osgText::Font3D instance as the font parameter, which can be obtained by
+the osgText::readFont3DFile() function.
+
+\section{tfa - 3D texts in world space}
+
+Both 2D and 3D texts can be transformed by their parent nodes.\\
+setPosition() method of osgText::TextBase only sets
+the location under the relative reference frame of the text object's parent.\\
+same thing to setRotation() and setAxisAlignment().\\
+\textbf{exception:} SCREEN alignment mode:
+\begin{lstlisting}
+text->setAxisAlignment( osgText::TextBase::SCREEN );
+\end{lstlisting}mimics the billboard technique of scene objects, and makes the text (either osg::Text
+or osg::Text3D ) always face the viewer.\\
+placing landmarks on earth or cities as billboards is a very common operation, and can be
+implemented with the SCREEN mode. In this case, rotation and parent transformations are
+not available and should not be used, as they may cause confusion and potential problems.\\
+
+\section{particle animations}
+smoke, dust, explosions, fluid, fire, rain.
+more difficult to build and manage a complete particle system rather than cconstruct other simple scene objects.\\
+\textrightarrow \textbf{osgParticle class}\\
+\textrightarrow complex particle systems, most of which may be extended and overridden using inheritance, if user-definded algorithmsr are needed.\\
+
+\textbf{osgParticle::Particle} represents the atomic particle unit.\\
+\textrightarrow often used as design template before the simularion loop atarts, copied and regenerated by the particle system in run-time to render massicve particles.\\
+
+osgParticle::ParticleSystem , manages the creation,
+updating, rendering, and destruction of all particles. It is derived from osg::Drawable ,
+so it can accept different rendering attributes and modes, just like normal drawables. It
+should be added to an osg::Geode nod, as the last class.\\
+
+\textbf{osgParticle::Emitter} abstract class, defines number and propterties of particles generated every frame.\\
+has 3 sub-controllers:
+\begin{enumerate}
+\item osgParticle::Placer sets the initial Position of every particle
+\item osgPartivle::Shooter sets the initioal velocities
+\item osgPartivle::Counter determines how many particles should be created
+\end{enumerate}
+\textbf{osgParticle::program} manips the position, velocity and other prroperties of each individual particle suring its lifetime.\\
+\textbf{osgParticle::ModularProgram} descendant class form osgParticle::Program, is composed of a list of osgParticle::Operator subclasses to perform operations on existing particles.\\
+
+particles need to be updated and re computed with osgParticle::ParticleSystemUpdater. This should be done as the last act.
+
+\chapter{Improving Rendering Efficiency}
+
+\section{Learn goals}
+\begin{enumerate}
+\item multithreaded operations and rendering in OSG
+\item concept of scene culling, occlusion culling technique
+\item ways to improver rendering performance, by modifying and sharing geometries and textures.
+\item dynamic paging mechanism and its utilization in handling huge datasets
+\end{enumerate}
+
+\section{OpenThread Basics}
+\textbf{OpenThreads}: lisghtweight, cross-platform thread API.\\
+For OSG classes and appsl\\
+OpenThreads::Thread = thread object.\\
+OpenThreads::Mutex = mutex for locking data that may be shared by different threads.\\
+\textrightarrow mutual exclusion object. allows multiple program threads to share the same resource (file access) but not simultaneously.\\
+OpenThreads::Barrier = barrier object. can be used where we want a set of threads to wait for each other.\\
+OpenThreads::Condition = like barrier, used for thread synchronization.\\
+
+\textbf{how to create a thread:} \\
+derive the OpenThreads::Thread base class.\\
+re-implement some of its virtual methods\\
+
+\textbf{convenient global functions:}
+\begin{itemize}
+\item GetNumberOfProcessors() available proccessors\\
+\item SetprocessorAffinityOfCurrentTHread() sets the processor affinity of the current thread. \textbf{affinity}: which processor uses which thread. should be called when the rthread is currently running.\\
+\item CurrentThread() static method of OpenThreads::Thread. Returns a pointer to the current running thread instance.
+\item YieldCurrentThread(0 static method of OpenThreads::Thread. Yields current thread and lets other threads take over the control of the processor.
+\item microSleep() static method of OpenThreads::Thread. make current thread sleep for a specified number of microseconds. It can be used in single-threaded apps too.
+\end{itemize}
+
+\section{TFA:  using a separate data receiver thread}
+
+
+
+
+
+
+
+
 
 
 

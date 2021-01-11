@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter09/P245_clicking_selecting_geometries/main.cpp
+osg/MatrixTransform
+-
+osg/ShapeDrawable
+-
+osg/PolygonMode
+-
+osg/StateAttribute
+-
+osg/StateSet
+-
+osgDB/ReadFile
+-
+osgGA/GUIActionAdapter
+-
+osgGA/GUIEventAdapter
+-
+osgGA/GUIEventHandler
+-
+osgUtil/LineSegmentIntersector
+-
+osgViewer/Viewer
+-
+

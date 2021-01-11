@@ -1,0 +1,3 @@
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter08/P195_switch_nodes_update_traversal/build/CMakeFiles/rebuild_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter08/P195_switch_nodes_update_traversal/build/CMakeFiles/edit_cache.dir
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter08/P195_switch_nodes_update_traversal/build/CMakeFiles/MyProject.dir

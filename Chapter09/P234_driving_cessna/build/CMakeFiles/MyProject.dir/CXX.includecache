@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jibald/Documents/OSG_testing/OSG_30_beginners_guide/Chapter09/P234_driving_cessna/main.cpp
+osg/MatrixTransform
+-
+osgDB/ReadFile
+-
+osgGA/GUIEventAdapter
+-
+osgGA/GUIEventHandler
+-
+osgViewer/Viewer
+-
+
